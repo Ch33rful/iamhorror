@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Horr</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>I AM HORROR</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      color: red;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #title {
+      font-size: 3em;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      z-index: 2;
+    }
+
+    #achievement {
+      margin-top: 20px;
+      font-size: 1.2em;
+      max-width: 90%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .media-player {
+      margin-top: 15px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .media-control {
+      background: none;
+      border: 1px solid red;
+      color: red;
+      padding: 5px 15px;
+      cursor: pointer;
+      font-family: monospace;
+    }
+
+    video {
+      max-width: 90%;
+      max-height: 50vh;
+    }
+
+    #game-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 999;
+    }
+
+    #maze {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      margin: 20px auto;
+      border: 2px solid red;
+    }
+
+    .wall {
+      position: absolute;
+      background: red;
+    }
+
+    #player {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: white;
+      transition: 0.1s;
+    }
+
+    #controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 0, 0, 0.3);
+      border: 1px solid red;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="title">I AM HORROR</div>
+  <div id="achievement"></div>
+
+  <div id="audio-player" class="media-player">
+    <button id="audio-control" class="media-control">⏸ PAUSE</button>
+  </div>
+  
+  <div id="video-player" class="media-player">
+    <video id="achievement-video">
+      <source src="mesto.mp4" type="video/mp4">
+    </video>
+    <button id="video-control" class="media-control">⏸ PAUSE</button>
+  </div>
+
+  <div id="game-container">
+    <div id="maze"></div>
+    <div id="controls">
+      <div></div>
+      <button class="control-btn" data-direction="up">↑</button>
+      <div></div>
+      <button class="control-btn" data-direction="left">←</button>
+      <div></div>
+      <button class="control-btn" data-direction="right">→</button>
+      <div></div>
+      <button class="control-btn" data-direction="down">↓</button>
+      <div></div>
+    </div>
+  </div>
+
+  <audio id="bg-music" src="bipolar.mp3" autoplay loop hidden></audio>
+  <audio id="achievement-music" src="iskra.mp3" hidden></audio>
+  <video id="trap-video" src="veselo.mp4" hidden></video>
+
+  <script>
+    const achievements = [
+      "Вы стали ближе к постоянному безумию..",
+      "Задумайтесь, я когда то был таким же обычным, как и Вы..",
+      "Может стоит уже забыть это место?",
+      "Вам так не терпится узнать, что это все означает, не так ли?",
+      "Правда есть постоянная ложь, истину глаголит лишь тот, чье тело неизмеримо",
+      "Минутка молчания",
+      "Столько мне давали, но столько же не ценили",
+      "Если бы ваши мечты стали реальностью, где бы вы оказались?",
+      "Ответив вчера на заданный вопрос, вы лишь приблизили себя к неминуемой системной гибели",
+      "Проще говоря: Вы - маленькая молекула, в страшном пространстве восприятия",
+      "Стоит ли терпеть эту глупую истину?",
+      "Сейчас мы на пол-пути к разгадке мироздания",
+      "А кто же он для Вас? этот беспомощный жалкий червяк, сочиняющий свою никчёмную музыку.",
+      "Должен ли он жить или должен страдать? Решите этот вопрос каждый для себя сам.",
+      "Мне даже его имя стыдно произносить, пусть будет раб М",
+      "Он воплощения всего самого неприятного, что мог в него заложить Я",
+      "А кто же Я? Следите за порядком вопросов, чтобы дать правильный ответ",
+      "С самого детства Вы что-то/кого-то любили, самые любимые воспоминания из детства для себя вытащите, пожалуйста",
+      "Я есть тот, кто создаёт эти воспоминания, какое же имя?!",
+      "Метафорически - Создатель, по правде говоря, не очень люблю это имя, слишком величественно звучит... Ваши пожелания в моем прозвище?",
+      "А чего Вы боялись в детстве, или сейчас, помните??",
+      "Я также это все создал.",
+      ".....",
+      "Я - УЖАС 0000"
+    ];
+
+    // Инициализация игры
+    const gameContainer = document.getElementById('game-container');
+    const maze = document.getElementById('maze');
+    const player = document.createElement('div');
+    player.id = 'player';
+    maze.appendChild(player);
+
+    const walls = [
+      [0, 0, 400, 20], [0, 380, 400, 20], [0, 0, 20, 400], [380, 0, 20, 400],
+      [100, 0, 20, 200], [200, 200, 20, 200], [300, 100, 20, 300],
+      [0, 100, 150, 20], [250, 100, 150, 20], [150, 300, 150, 20],
+      [50, 200, 20, 150], [150, 150, 150, 20], [250, 250, 20, 150],
+      [50, 50, 20, 100], [350, 50, 20, 100], [50, 350, 20, 30],
+      [330, 350, 20, 30], [200, 50, 20, 100], [200, 250, 20, 100]
+    ];
+
+    walls.forEach(wall => {
+      const wallEl = document.createElement('div');
+      wallEl.className = 'wall';
+      wallEl.style.left = `${wall[0]}px`;
+      wallEl.style.top = `${wall[1]}px`;
+      wallEl.style.width = `${wall[2]}px`;
+      wallEl.style.height = `${wall[3]}px`;
+      maze.appendChild(wallEl);
+    });
+
+    let playerPos = {x: 30, y: 30};
+    let isGameActive = false;
+
+    function checkCollision(newX, newY) {
+      const playerRect = {
+        x: newX,
+        y: newY,
+        width: 16,
+        height: 16
+      };
+
+      return Array.from(document.getElementsByClassName('wall')).some(wall => {
+        const wallRect = wall.getBoundingClientRect();
+        return !(playerRect.x + playerRect.width <= wallRect.left ||
+                playerRect.x >= wallRect.left + wallRect.width ||
+                playerRect.y + playerRect.height <= wallRect.top ||
+                playerRect.y >= wallRect.top + wallRect.height);
+      });
+    }
+
+    function movePlayer(direction) {
+      if (!isGameActive) return;
+
+      let newX = playerPos.x;
+      let newY = playerPos.y;
+      const step = 5;
+
+      switch(direction) {
+        case 'up': newY -= step; break;
+        case 'down': newY += step; break;
+        case 'left': newX -= step; break;
+        case 'right': newX += step; break;
+      }
+
+      if (!checkCollision(newX, newY)) {
+        playerPos = {x: newX, y: newY};
+        player.style.transform = `translate(${newX}px, ${newY}px)`;
+      } else {
+        const trapVideo = document.getElementById('trap-video');
+        isGameActive = false;
+        gameContainer.style.display = 'none';
+        trapVideo.play();
+        trapVideo.style.display = 'block';
+        trapVideo.addEventListener('ended', () => {
+          trapVideo.style.display = 'none';
+          bgMusic.play();
+        });
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!isGameActive) return;
+      const directions = {ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right'};
+      if (directions[e.key]) movePlayer(directions[e.key]);
+    });
+
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        movePlayer(btn.dataset.direction);
+      });
+    });
+
+    // Основной код
+    const startDate = new Date(2025, 3, 7);
+    const today = new Date();
+    const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const normalizedStartDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    
+    const timeDiff = currentDate.getTime() - normalizedStartDate.getTime();
+    const dayIndex = Math.floor(timeDiff / (1000 * 3600 * 24));
+
+    const title = document.getElementById("title");
+    const achievementBox = document.getElementById("achievement");
+    const bgMusic = document.getElementById("bg-music");
+    const achievementMusic = document.getElementById("achievement-music");
+    const achievementVideo = document.getElementById("achievement-video");
+    
+    const audioPlayer = document.getElementById("audio-player");
+    const audioControl = document.getElementById("audio-control");
+    
+    const videoPlayer = document.getElementById("video-player");
+    const videoControl = document.getElementById("video-control");
+
+    let currentMedia = null;
+
+    function handleMediaPlay(mediaElement) {
+      bgMusic.pause();
+      currentMedia = mediaElement;
+    }
+
+    function handleMediaPause() {
+      if (!currentMedia) return;
+      bgMusic.play();
+      currentMedia = null;
+    }
+
+    achievementMusic.addEventListener('play', () => {
+      handleMediaPlay(achievementMusic);
+      audioControl.textContent = '⏸ PAUSE';
+      audioPlayer.style.display = 'flex';
+    });
+
+    achievementMusic.addEventListener('pause', () => {
+      handleMediaPause();
+      audioControl.textContent = '▶ PLAY';
+    });
+
+    achievementMusic.addEventListener('ended', () => {
+      audioPlayer.style.display = 'none';
+      handleMediaPause();
+    });
+
+    achievementVideo.addEventListener('play', () => {
+      handleMediaPlay(achievementVideo);
+      videoControl.textContent = '⏸ PAUSE';
+      videoPlayer.style.display = 'flex';
+    });
+
+    achievementVideo.addEventListener('pause', () => {
+      videoControl.textContent = '▶ PLAY';
+      handleMediaPause();
+    });
+
+    achievementVideo.addEventListener('ended', () => {
+      videoPlayer.style.display = 'none';
+      handleMediaPause();
+    });
+
+    audioControl.addEventListener('click', () => {
+      achievementMusic.paused ? achievementMusic.play() : achievementMusic.pause();
+    });
+
+    videoControl.addEventListener('click', () => {
+      achievementVideo.paused ? achievementVideo.play() : achievementVideo.pause();
+    });
+
+    title.addEventListener("click", () => {
+      if (dayIndex >= 0 && dayIndex < achievements.length) {
+        achievementBox.textContent = achievements[dayIndex];
+        
+        achievementMusic.pause();
+        achievementVideo.pause();
+        audioPlayer.style.display = 'none';
+        videoPlayer.style.display = 'none';
+        gameContainer.style.display = 'none';
+        isGameActive = false;
+
+        if (dayIndex === 1) { 
+          achievementMusic.currentTime = 0;
+          achievementMusic.play();
+        } else if (dayIndex === 2) { 
+          achievementVideo.currentTime = 0;
+          achievementVideo.play();
+        } else if (dayIndex === 3) {
+          bgMusic.pause();
+          gameContainer.style.display = 'block';
+          playerPos = {x: 30, y: 30};
+          player.style.transform = `translate(${playerPos.x}px, ${playerPos.y}px)`;
+          isGameActive = true;
+        } else {
+          bgMusic.play();
+        }
+        
+      } else if (dayIndex < 0) {
+        achievementBox.textContent = "Ещё рано...";
+      } else {
+        achievementBox.textContent = "Вы дошли до предела.";
+      }
+    });
+
+    document.addEventListener('click', () => {
+      bgMusic.play();
+    }, { once: true });
+
+    bgMusic.volume = 0.25;
+    achievementMusic.volume = 0.5;
+  </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
