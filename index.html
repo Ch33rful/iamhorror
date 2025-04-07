@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>I AM HORROR</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      color: red;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    #title {
+      font-size: 3em;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #achievement {
+      margin-top: 20px;
+      font-size: 1.2em;
+      max-width: 90%;
+    }
+
+    .media-player {
+      margin-top: 15px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .media-control {
+      background: none;
+      border: 1px solid red;
+      color: red;
+      padding: 5px 15px;
+      cursor: pointer;
+      font-family: monospace;
+    }
+
+    video {
+      max-width: 90%;
+      max-height: 50vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="title">I AM HORROR</div>
+  <div id="achievement"></div>
+  
+  <!-- Аудио плеер -->
+  <div id="audio-player" class="media-player">
+    <button id="audio-control" class="media-control">⏸ PAUSE</button>
+  </div>
+  
+  <!-- Видео плеер -->
+  <div id="video-player" class="media-player">
+    <video id="achievement-video">
+      <source src="mesto.mp4" type="video/mp4">
+    </video>
+    <button id="video-control" class="media-control">⏸ PAUSE</button>
+  </div>
+
+  <audio id="bg-music" src="bipolar.mp3" autoplay loop hidden></audio>
+  <audio id="achievement-music" src="iskra.mp3" hidden></audio>
+
+  <script>
+    const achievements = [
+      "Вы стали ближе к постоянному безумию..",
+      "Задумайтесь, я когда то был таким же обычным, как и Вы..",
+      "Может стоит уже забыть это место?",
+      "Вам так не терпится узнать, что это все означает, не так ли?",
+      "Правда есть постоянная ложь, истину глаголит лишь тот, чье тело неизмеримо",
+      "Минутка молчания",
+      "Столько мне давали, но столько же не ценили",
+      "Если бы ваши мечты стали реальностью, где бы вы оказались?",
+      "Ответив вчера на заданный вопрос, вы лишь приблизили себя к неминуемой системной гибели",
+      "Проще говоря: Вы - маленькая молекула, в страшном пространстве восприятия",
+      "Стоит ли терпеть эту глупую истину?",
+      "Сейчас мы на пол-пути к разгадке мироздания",
+      "А кто же он для Вас? этот беспомощный жалкий червяк, сочиняющий свою никчёмную музыку.",
+      "Должен ли он жить или должен страдать? Решите этот вопрос каждый для себя сам.",
+      "Мне даже его имя стыдно произносить, пусть будет раб М",
+      "Он воплощения всего самого неприятного, что мог в него заложить Я",
+      "А кто же Я? Следите за порядком вопросов, чтобы дать правильный ответ",
+      "С самого детства Вы что-то/кого-то любили, самые любимые воспоминания из детства для себя вытащите, пожалуйста",
+      "Я есть тот, кто создаёт эти воспоминания, какое же имя?!",
+      "Метафорически - Создатель, по правде говоря, не очень люблю это имя, слишком величественно звучит... Ваши пожелания в моем прозвище?",
+      "А чего Вы боялись в детстве, или сейчас, помните??",
+      "Я также это все создал.",
+      ".....",
+      "Я - УЖАС 0000"
+    ];
+
+    const startDate = new Date(2025, 3, 7); // 7 апреля 2025
+    const today = new Date();
+    const currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const normalizedStartDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    
+    const timeDiff = currentDate.getTime() - normalizedStartDate.getTime();
+    const dayIndex = Math.floor(timeDiff / (1000 * 3600 * 24));
+
+    const title = document.getElementById("title");
+    const achievementBox = document.getElementById("achievement");
+    const bgMusic = document.getElementById("bg-music");
+    const achievementMusic = document.getElementById("achievement-music");
+    const achievementVideo = document.getElementById("achievement-video");
+    
+    const audioPlayer = document.getElementById("audio-player");
+    const audioControl = document.getElementById("audio-control");
+    
+    const videoPlayer = document.getElementById("video-player");
+    const videoControl = document.getElementById("video-control");
+
+    let currentMedia = null;
+
+    // Общая логика управления медиа
+    function handleMediaPlay(mediaElement) {
+      bgMusic.pause();
+      currentMedia = mediaElement;
+    }
+
+    function handleMediaPause() {
+      if (!currentMedia) return;
+      bgMusic.play();
+      currentMedia = null;
+    }
+
+    // Обработчики для аудио
+    achievementMusic.addEventListener('play', () => {
+      handleMediaPlay(achievementMusic);
+      audioControl.textContent = '⏸ PAUSE';
+      audioPlayer.style.display = 'flex';
+    });
+
+    achievementMusic.addEventListener('pause', () => {
+      handleMediaPause();
+      audioControl.textContent = '▶ PLAY';
+    });
+
+    achievementMusic.addEventListener('ended', () => {
+      audioPlayer.style.display = 'none';
+      handleMediaPause();
+    });
+
+    // Обработчики для видео
+    achievementVideo.addEventListener('play', () => {
+      handleMediaPlay(achievementVideo);
+      videoControl.textContent = '⏸ PAUSE';
+      videoPlayer.style.display = 'flex';
+    });
+
+    achievementVideo.addEventListener('pause', () => {
+      videoControl.textContent = '▶ PLAY';
+      handleMediaPause();
+    });
+
+    achievementVideo.addEventListener('ended', () => {
+      videoPlayer.style.display = 'none';
+      handleMediaPause();
+    });
+
+    // Управление кнопками
+    audioControl.addEventListener('click', () => {
+      achievementMusic.paused ? achievementMusic.play() : achievementMusic.pause();
+    });
+
+    videoControl.addEventListener('click', () => {
+      achievementVideo.paused ? achievementVideo.play() : achievementVideo.pause();
+    });
+
+    // Основной обработчик клика
+    title.addEventListener("click", () => {
+      if (dayIndex >= 0 && dayIndex < achievements.length) {
+        achievementBox.textContent = achievements[dayIndex];
+        
+        // Сброс предыдущего медиа
+        achievementMusic.pause();
+        achievementVideo.pause();
+        audioPlayer.style.display = 'none';
+        videoPlayer.style.display = 'none';
+
+        if (dayIndex === 1) { // 8 апреля
+          achievementMusic.currentTime = 0;
+          achievementMusic.play();
+        } else if (dayIndex === 2) { // 9 апреля
+          achievementVideo.currentTime = 0;
+          achievementVideo.play();
+        } else {
+          bgMusic.play();
+        }
+        
+      } else if (dayIndex < 0) {
+        achievementBox.textContent = "Ещё рано...";
+      } else {
+        achievementBox.textContent = "Вы дошли до предела.";
+      }
+    });
+
+    // Инициализация аудио
+    document.addEventListener('click', () => {
+      bgMusic.play();
+    }, { once: true });
+
+    bgMusic.volume = 0.25;
+    achievementMusic.volume = 0.5;
+  </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
