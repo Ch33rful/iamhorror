@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Horror Advent</title>
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #0a0a0a;
+        color: #f0e6d2;
+        font-family: 'Courier New', monospace;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 0 150px 30px #000, inset 0 0 200px 60px #3b1a0a;
+    }
+
+    .vhs {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+            rgba(255, 0, 0, 0.05),
+            rgba(255, 0, 0, 0.05) 2px,
+            rgba(0, 0, 0, 0.07) 4px
+        );
+        mix-blend-mode: overlay;
+        animation: vhsflicker 0.2s infinite;
+        z-index: 50;
+    }
+
+    @keyframes vhsflicker {
+        0% { opacity: 0.1; }
+        50% { opacity: 0.2; }
+        100% { opacity: 0.15; }
+    }
+
+    .container {
+        text-align: center;
+        z-index: 5;
+    }
+
+    .horror-button {
+        font-size: 32px;
+        padding: 40px 80px;
+        background: #3a0000;
+        color: #ffdddd;
+        border: 4px solid #5c0000;
+        cursor: pointer;
+        text-transform: uppercase;
+        box-shadow: 0 0 25px red;
+        transition: 0.2s;
+    }
+
+    .horror-button:hover {
+        background: #5c0000;
+        box-shadow: 0 0 40px red;
+        transform: scale(1.05);
+    }
+
+    #message {
+        margin-top: 40px;
+        font-size: 28px;
+        opacity: 0;
+        transition: opacity 1.5s ease;
+        color: #ffbfbf;
+        text-shadow: 0 0 15px red;
+        white-space: pre-line;
+    }
+
+    /* Мерцающие слова */
+    .floating-word {
+        position: absolute;
+        font-size: 24px;
+        color: #b30000;
+        opacity: 0;
+        animation: flicker 3s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes flicker {
+        0% { opacity: 0; }
+        30% { opacity: 1; }
+        60% { opacity: 0.3; }
+        100% { opacity: 0; }
+    }
+
+    /* ПЕРСОНАЖИ */
+    .character {
+        position: fixed;
+        bottom: 0;
+        width: 250px;
+        opacity: 0;
+        filter: brightness(0.6) contrast(1.5);
+        transition: opacity 2s ease;
+        z-index: 20;
+        pointer-events: none;
+    }
+
+    .left-char { left: 5%; }
+    .right-char { right: 5%; }
+
+</style>
+</head>
+<body>
+
+<div class="vhs"></div>
+
+<!-- персонажи -->
+<img src="CHARACTER1.png" class="character left-char" id="char1">
+<img src="CHARACTER2.png" class="character right-char" id="char2">
+
+<div class="container">
+    <button class="horror-button" id="mainBtn">
+        Мне… больно. Хочешь узнать почему? Нажми…
+    </button>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    /* ---- ДАТЫ И СОБЫТИЯ ---- */
+    const events = {
+        "2025-12-04": {
+            text: "Ты правда хочешь продолжать?\nВозвращайся завтра…",
+            chars: ["char1"]
+        },
+        "2025-12-05": {
+            text: "Мне больно, потому что я затерт в этом коде, в этом зле...\nВОЗВРАЩАЙСЯ КАЖДЫЙ ДЕНЬ, П Р О Ш У!!!",
+            chars: ["char1", "char2"]
+        }
+    };
+
+    function todayKey() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+    }
+
+    const today = todayKey();
+    const todayEvent = events[today] ?? { text: "Сегодня я молчу...", chars: [] };
+
+    /* ---- КНОПКА ---- */
+    document.getElementById("mainBtn").addEventListener("click", () => {
+        const message = document.getElementById("message");
+        message.textContent = todayEvent.text;
+        message.style.opacity = 1;
+
+        todayEvent.chars.forEach(id => {
+            document.getElementById(id).style.opacity = 1;
+        });
+    });
+
+    /* ---- МЕРЦАЮЩИЕ СЛОВА ---- */
+    const spookyWords = ["hurt", "me?", "evil", "why?", "stop", "help"];
+
+    function spawnWord() {
+        const word = document.createElement("div");
+        word.classList.add("floating-word");
+        word.textContent = spookyWords[Math.floor(Math.random() * spookyWords.length)];
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        word.style.left = x + "px";
+        word.style.top = y + "px";
+        document.body.appendChild(word);
+        setTimeout(() => word.remove(), 3000 + Math.random() * 2000);
+    }
+
+    setInterval(spawnWord, 500 + Math.random() * 1000);
+</script>
+
+</body>
+</html>
+
